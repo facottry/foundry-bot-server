@@ -9,9 +9,10 @@ const personalityCache = {
 };
 const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
+const Personality = require('../models/Personality');
+
 /**
- * Fetch personality by mode from adminserver
- * Customer never sees persona name - only tone and greeting
+ * Fetch personality by mode from Database (Direct Access)
  * 
  * @param {string} mode - 'mini' or 'full'
  * @returns {Object} - { tone, greeting }
@@ -26,23 +27,32 @@ async function fetchPersonalityByMode(mode) {
     }
 
     try {
-        const adminServerUrl = process.env.ADMIN_SERVER_URL || 'http://localhost:5001';
-        const response = await fetch(`${adminServerUrl}/api/admin/personalities/mode/${mode}`);
+        // Query DB directly
+        // Priority: 1. Mode specific, 2. Active Default
+        let personality = await Personality.findOne({ defaultMode: mode });
 
-        if (response.ok) {
-            const personality = await response.json();
+        if (!personality) {
+            personality = await Personality.findOne({ isActive: true });
+        }
+
+        if (personality) {
+            const data = {
+                tone: personality.tone,
+                greeting: personality.greeting
+            };
+
             personalityCache[mode] = {
-                data: personality,
+                data: data,
                 expiry: now + CACHE_DURATION_MS
             };
-            console.log(`[Clicky] Personality loaded for mode: ${mode}`);
-            return personality;
+            console.log(`[Clicky] Personality loaded from DB for mode: ${mode}`);
+            return data;
         }
     } catch (error) {
-        console.error(`[Clicky] Failed to fetch personality for ${mode}:`, error.message);
+        console.error(`[Clicky] Failed to fetch personality from DB for ${mode}:`, error.message);
     }
 
-    // Return hardcoded defaults if fetch fails
+    // Return hardcoded defaults if DB fetch fails
     if (mode === 'mini') {
         return {
             tone: 'You are AIRA - Archive & Intelligence Record Assistant. Role: Records, Memory, Truth. Be factual and neutral.',
@@ -108,7 +118,7 @@ router.post('/refresh-personality', authMiddleware, async (req, res) => {
     ]);
 
     res.json({
-        message: 'Personality cache refreshed',
+        message: 'Personality cache refreshed from Database',
         mini: !!mini,
         full: !!full
     });
