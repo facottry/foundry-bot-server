@@ -6,6 +6,7 @@ const OpenAI = require('openai');
 const { AIRA_SYSTEM_PROMPT, REX_SYSTEM_PROMPT, OUT_OF_SCOPE_RESPONSE } = require('./prompts');
 const queryRouter = require('./router');
 const validator = require('./validator');
+const { fetchPersonalityByMode } = require('../routes/session');
 
 class PersonaAI {
     constructor() {
@@ -24,12 +25,38 @@ class PersonaAI {
     }
 
     /**
+     * Get response format rules to append to dynamic tone
+     */
+    _getResponseFormatRules(persona) {
+        return `
+
+RESPONSE RULES:
+- No emojis, no casual language
+- Conservative answers preferred
+- Authority > helpfulness
+- No "as an AI language model"
+- No motivational content
+
+OUTPUT FORMAT (STRICT JSON):
+{
+  "persona": "${persona}",
+  "answer": "string",
+  "confidence": 0.0-1.0,
+  "source": ["record_type", "timestamp"],
+  "notes": "optional"
+}
+
+If no data: confidence = 0.0, source = []`;
+    }
+
+    /**
      * Process query through AIRA or REX
      * @param {string} query - User query
      * @param {object} context - Founder/product data context
      * @param {string} forcedPersona - Optional: 'AIRA' or 'REX'
+     * @param {string} mode - 'mini' or 'full' (determines persona)
      */
-    async process(query, context = {}, forcedPersona = null) {
+    async process(query, context = {}, forcedPersona = null, mode = null) {
         this._initClient();
 
         if (!this.openai) {
@@ -51,10 +78,26 @@ class PersonaAI {
             return OUT_OF_SCOPE_RESPONSE;
         }
 
-        // Get appropriate system prompt
-        const systemPrompt = routing.persona === 'AIRA'
-            ? AIRA_SYSTEM_PROMPT
-            : REX_SYSTEM_PROMPT;
+        // Get appropriate system prompt - prefer dynamic from adminserver
+        let systemPrompt;
+        const targetMode = routing.persona === 'AIRA' ? 'mini' : 'full';
+
+        try {
+            const personality = await fetchPersonalityByMode(mode || targetMode);
+            if (personality && personality.tone) {
+                // Use dynamic tone from adminserver
+                systemPrompt = personality.tone + this._getResponseFormatRules(routing.persona);
+                console.log(`[PersonaAI] Using dynamic tone for mode: ${targetMode}`);
+            } else {
+                throw new Error('No dynamic tone available');
+            }
+        } catch (err) {
+            // Fallback to static prompts
+            console.log(`[PersonaAI] Falling back to static prompt`);
+            systemPrompt = routing.persona === 'AIRA'
+                ? AIRA_SYSTEM_PROMPT
+                : REX_SYSTEM_PROMPT;
+        }
 
         // Build context string
         const contextStr = this._buildContext(context);
