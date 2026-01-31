@@ -35,8 +35,19 @@ const limiter = rateLimit({
 // Database Connection
 mongoService.connect().catch(console.error);
 
+// Root Route
+app.get('/', (req, res) => res.json({
+    service: 'Foundry Bot Server',
+    status: 'running',
+    version: '1.0.0'
+}));
+
 // Health Check
-app.get('/health', (req, res) => res.send('OK'));
+app.get('/health', (req, res) => res.json({
+    status: 'OK',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+}));
 
 // Session Routes (for personality initialization)
 app.use('/api/session', sessionRoutes);
