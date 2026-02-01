@@ -28,11 +28,15 @@ async function fetchPersonalityByMode(mode) {
 
     try {
         // Query DB directly
-        // Priority: 1. Mode specific, 2. Active Default
-        let personality = await Personality.findOne({ defaultMode: mode });
+        // Mapping: mini -> AIRA, full -> REX
+        const targetType = mode === 'mini' ? 'AIRA' : 'REX';
 
+        // Priority 1: Active personality of the correct TYPE
+        let personality = await Personality.findOne({ type: targetType, isActive: true });
+
+        // Priority 2: Fallback to Mode specific default (Legacy)
         if (!personality) {
-            personality = await Personality.findOne({ isActive: true });
+            personality = await Personality.findOne({ defaultMode: mode });
         }
 
         if (personality) {
@@ -45,7 +49,7 @@ async function fetchPersonalityByMode(mode) {
                 data: data,
                 expiry: now + CACHE_DURATION_MS
             };
-            console.log(`[Clicky] Personality loaded from DB for mode: ${mode}`);
+            console.log(`[Clicky] Personality loaded from DB for mode: ${mode} (Type: ${targetType}, Name: ${personality.name})`);
             return data;
         }
     } catch (error) {
