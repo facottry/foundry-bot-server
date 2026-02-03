@@ -1,6 +1,6 @@
 {
   "name": "botserver",
-  "version": "1.0.0",
+  "version": "3.3.3",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
