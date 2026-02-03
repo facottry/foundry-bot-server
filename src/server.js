@@ -49,6 +49,10 @@ app.get('/health', (req, res) => res.json({
     timestamp: new Date().toISOString()
 }));
 
+// Wakeup Route
+app.get('/wakeup', (req, res) => res.send('Wakeup call received'));
+
+
 // Session Routes (for personality initialization)
 app.use('/api/session', sessionRoutes);
 
