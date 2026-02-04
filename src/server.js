@@ -9,6 +9,7 @@ const aiService = require('./services/ai');
 const rateLimit = require('express-rate-limit');
 const sessionRoutes = require('./routes/session');
 const { fetchActivePersonality } = require('./routes/session');
+const { version } = require('../package.json');
 
 const app = express();
 
@@ -16,6 +17,12 @@ const app = express();
 app.use(helmet());
 app.use(cors({ origin: process.env.Origin || '*' }));
 app.use(express.json());
+
+// Add API_VERSION header to all responses
+app.use((req, res, next) => {
+    res.setHeader('X-API-VERSION', version);
+    next();
+});
 
 // Rate Limiting
 const limiter = rateLimit({
