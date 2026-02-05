@@ -16,7 +16,7 @@ class PersonaAI {
     _initClient() {
         if (this.openai) return;
 
-        const apiKey = process.env.FOUNDRY_OPENAI_KEY || process.env.OPENAI_API_KEY;
+        const apiKey = process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY;
         if (!apiKey) {
             console.error('[PersonaAI] CRITICAL: OpenAI API key missing');
             return;

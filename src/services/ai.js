@@ -9,9 +9,9 @@ class AIService {
     _initClient() {
         if (this.openai) return;
 
-        const apiKey = process.env.FOUNDRY_OPENAI_KEY || process.env.OPENAI_API_KEY;
+        const apiKey = process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY;
         if (!apiKey) {
-            console.error('CRITICAL: FOUNDRY_OPENAI_KEY is missing in environment variables.');
+            console.error('CRITICAL: OPENAI_API_KEY is missing in environment variables.');
             return;
         }
         this.openai = new OpenAI({ apiKey });

@@ -1,13 +1,15 @@
 {
   "name": "botserver",
-  "version": "3.3.5.1",
+  "version": "3.3.5.2",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "commit": "git add . && git commit -m 'update' && git push origin main",
-    "production": "git push --force-with-lease origin main:PRODUCTION_DEPLOYMENT"
+    "production": "git push --force-with-lease origin main:PRODUCTION_DEPLOYMENT",
+    "tagversion": "node -e \"const v=require('./package.json').version; const {execSync}=require('child_process'); const d=new Date(); const ts=d.toLocaleString('en-GB',{year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:true}).replace(',',''); try{execSync(`git tag -a v${v} -m \\\"Release v${v} at ${ts}\\\"`,{stdio:'inherit'})}catch(e){console.log('Tag v'+v+' already exists. Skipping.')}\"",
+    "tagversionpush": "npm run tagversion && git push origin --tags"
   },
   "keywords": [],
   "author": "",
