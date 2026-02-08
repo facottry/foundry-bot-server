@@ -44,7 +44,7 @@ class AIService {
         if (!data || (Array.isArray(data) && data.length === 0)) {
             return {
                 uiMode: 'mini',
-                html: '<section class="clicky-error"><p>I couldn\'t find any data matching your request in the Foundry database.</p></section>',
+                html: '<section class="clicky-error"><p>I couldn\'t find any data matching your request in the Clicktory database.</p></section>',
                 summary: 'No matching data found.',
                 suggestions: ['Try searching for "Analytics"', 'Show me trending products', 'What categories are available?']
             };
@@ -59,9 +59,9 @@ class AIService {
             case 'mutation_refused':
                 return {
                     uiMode: 'mini',
-                    html: '<section class="clicky-error"><p>I\'m a read-only assistant. I cannot delete, modify, or create data. I can only answer questions about products, founders, and public information on Foundry.</p></section>',
+                    html: '<section class="clicky-error"><p>I\'m a read-only assistant. I cannot delete, modify, or create data. I can only answer questions about products, founders, and public information on Clicktory.</p></section>',
                     summary: 'Request refused: Clicky is read-only.',
-                    suggestions: ['Show me trending products', 'How many founders are on Foundry?', 'What categories are available?']
+                    suggestions: ['Show me trending products', 'How many founders are on Clicktory?', 'What categories are available?']
                 };
 
             case 'search_products':
@@ -95,7 +95,7 @@ class AIService {
 
             case 'trending_products':
                 html = widgets.statsWidget('Trending Products', data);
-                summary = 'Here are the latest trending products on Foundry.';
+                summary = 'Here are the latest trending products on Clicktory.';
                 uiMode = 'full';
                 suggestions = ['What are the top rated?', 'Browse all categories'];
                 break;
@@ -109,21 +109,21 @@ class AIService {
 
             case 'category_list':
                 html = widgets.categoryPills(data);
-                summary = `${data.length} categories available on Foundry.`;
+                summary = `${data.length} categories available on Clicktory.`;
                 uiMode = 'full';
                 suggestions = ['Show products in Analytics', 'What are trending products?'];
                 break;
 
             case 'stats_overview':
                 html = widgets.platformStats(data);
-                summary = `Foundry has ${data.founders} founders, ${data.products} products, ${data.reviews} reviews across ${data.categories} categories.`;
+                summary = `Clicktory has ${data.founders} founders, ${data.products} products, ${data.reviews} reviews across ${data.categories} categories.`;
                 uiMode = 'mini';
                 suggestions = ['Show all founders', 'List all categories', 'Show trending products'];
                 break;
 
             case 'founder_list':
                 html = widgets.founderGrid(data);
-                summary = `${data.length} founders on Foundry.`;
+                summary = `${data.length} founders on Clicktory.`;
                 uiMode = 'full';
                 suggestions = ['Show trending products', 'Platform statistics'];
                 break;
@@ -165,7 +165,7 @@ class AIService {
         const toneInstruction = personality?.tone || 'Confident, Professional, Honest, No emojis.';
 
         const systemPrompt = `
-You are Clicky, an internal AI product analyst for Foundry.
+You are Clicky, an internal AI product analyst for Clicktory.
 Tone: ${toneInstruction}
 Output Format: JSON only.
 Structure:

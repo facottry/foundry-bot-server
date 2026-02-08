@@ -44,7 +44,7 @@ mongoService.connect().catch(console.error);
 
 // Root Route
 app.get('/', (req, res) => res.json({
-    service: 'Foundry Bot Server',
+    service: 'Clicktory Bot Server',
     status: 'running',
     version: '1.0.0'
 }));
